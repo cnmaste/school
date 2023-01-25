@@ -22,6 +22,7 @@ namespace school
     public partial class school : Form
     {
         Database db = new Database();
+        Database db2 = new Database();
         int selectedRow;
         int selectedRecordId;
 
@@ -44,31 +45,47 @@ namespace school
         private void refreshDataGrid(DataGridView dgv)
         {
             dgv.Rows.Clear();
-            string query = $"SELECT *,(SELECT ISNULL(STRING_AGG(EquipName,','),':(') FROM EquipLinks INNER JOIN Equip on EquipLinks.EquipId = Equip.Id WHERE EquipLinks.CabId = School.Id),(SELECT ISNULL(STRING_AGG(SpecName,','),':(') FROM SpecLinks INNER JOIN Spec on SpecLinks.SpecId = Spec.Id WHERE SpecLinks.CabId = School.Id) FROM School ";
+            string query = $"SELECT * FROM School ";
             SqlCommand cmd = new SqlCommand(query, db.getConn());
             db.openConn();
             SqlDataReader dr = cmd.ExecuteReader();
             while (dr.Read())
             {
-                dgv.Rows.Add(dr.GetInt32(0), dr.GetInt32(1), dr.GetInt32(2), dr.GetInt32(3),dr.GetString(4),dr.GetString(5));
+                int id = dr.GetInt32(0);
+                MessageBox.Show(id.ToString());
+                dgv.Rows.Add(id, dr.GetInt32(1), dr.GetInt32(2), dr.GetInt32(3),getEquipStringById(id),getSpecStringById(id));
             }
             dr.Close();
         }
-//        private void updateSpecList(ComboBox cb)
-//        {
-//            cb.Items.Clear();
-//            string query = $"SELECT * FROM Spec";
-//            SqlCommand cmd = new SqlCommand(query, db.getConn());
-//            db.openConn();
-//            SqlDataReader dr = cmd.ExecuteReader();
-//            while (dr.Read())
-//            {
-
-////                cb.Items.Add(dr.GetInt32(0),dr.GetString(1));
-//            }
-//            dr.Close();
-//        }
-
+        private string getSpecStringById(int id)
+        {
+            string query = $"SELECT Spec.SpecName FROM SpecLinks left join Spec on SpecLinks.SpecId = Spec.Id WHERE SpecLinks.CabId = {id}";
+            string[] specs = new string[] { };
+            SqlCommand cmd = new SqlCommand(query, db2.getConn());
+            db2.openConn();
+            SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                specs.Append(dr.GetString(0));
+            }
+            dr.Close();
+            return string.Join(", ", specs);
+        }
+        private string getEquipStringById(int id)
+        {
+            string query = $"SELECT Equip.EquipName FROM EquipLinks left join Equip on EquipLinks.EquipId = Equip.Id WHERE EquipLinks.CabId = {id}";
+            string[] equips = new string[] { };
+            SqlCommand cmd = new SqlCommand(query, db2.getConn());
+            db2.openConn();
+            SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                equips.Append(dr.GetString(0));
+            }
+            dr.Close();
+            MessageBox.Show(equips.Length.ToString());
+            return string.Join(", ", equips);
+        }
 
         private void school_Load(object sender, EventArgs e)
         {
@@ -95,8 +112,6 @@ namespace school
                 box.Click += new EventHandler(checkEquip);
                 box.AutoSize = true;
                 box.Location = new Point(10, 20 + (i++ * 20));
-                MessageBox.Show(equipGroupBox.Top.ToString());
-                MessageBox.Show(equipGroupBox.Left.ToString());
                 equipGroupBox.Controls.Add(box);
             }
             dr.Close();
@@ -127,55 +142,9 @@ namespace school
         }
         private void checkSpec(object sender, EventArgs e)
         {
-            CheckBox box = (CheckBox)sender;
-            
-            if (box.Checked == true) {
-                string query = $"SELECT COUNT(*) FROM SpecLinks WHERE CabId =  '{selectedRecordId}' AND SpecId = '{box.Tag.ToString()}'";
-                MessageBox.Show(query);
-                SqlCommand cmd = new SqlCommand(query, db.getConn());
-                db.openConn();
-                Int32 count = (Int32)cmd.ExecuteScalar();
-                if (count == 0)
-                {
-                    string insertQuery = $"INSERT INTO SpecLinks (CabId, SpecId) values ('{selectedRecordId}', '{box.Tag.ToString()}')";
-                    SqlCommand insertCmd = new SqlCommand(insertQuery, db.getConn());
-                    insertCmd.ExecuteNonQuery();
-                }
-            }
-            else
-            {
-                string query = $"DELETE FROM SpecLinks where CabId = '{selectedRecordId}' AND SpecId = {box.Tag.ToString()}";
-                SqlCommand cmd = new SqlCommand(query, db.getConn());
-                db.openConn();
-                cmd.ExecuteNonQuery();
-            }
-            refreshDataGrid(dataGridView1);
         }
         private void checkEquip(object sender, EventArgs e)
         {
-            CheckBox box = (CheckBox)sender;
-            if (box.Checked == true)
-            {
-                MessageBox.Show($"lalala {box.Tag.ToString()} ");
-                string query = $"SELECT COUNT(*) FROM EquipLinks WHERE CabId =  '{selectedRecordId}' AND EquipId = '{box.Tag.ToString()}'";
-                SqlCommand cmd = new SqlCommand(query, db.getConn());
-                db.openConn();
-                Int32 count = (Int32)cmd.ExecuteScalar();
-                if (count == 0)
-                {
-                    string insertQuery = $"INSERT INTO EquipLinks (CabId, EquipId) values ('{selectedRecordId}', '{box.Tag.ToString()}')";
-                    SqlCommand insertCmd = new SqlCommand(insertQuery, db.getConn());
-                    insertCmd.ExecuteNonQuery();
-                }
-            }
-            else
-            {
-                string query = $"DELETE FROM EquipLinks where CabId = '{selectedRecordId}' AND EquipId = {box.Tag.ToString()}";
-                SqlCommand cmd = new SqlCommand(query, db.getConn());
-                db.openConn();
-                cmd.ExecuteNonQuery();
-            }
-            refreshDataGrid(dataGridView1);
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -254,10 +223,37 @@ namespace school
 
         private void addButton_Click(object sender, EventArgs e)
         {
-            string query = $"INSERT INTO School (Number, Floor, Capacity) values ('{cabUpDown.Value.ToString()}','{floorUpDown.Value.ToString()}','{capacityUpDown.Value.ToString()}')";
+            string query = $"INSERT INTO School (Number, Floor, Capacity) OUTPUT INSERTED.ID VALUES ('{cabUpDown.Value.ToString()}','{floorUpDown.Value.ToString()}','{capacityUpDown.Value.ToString()}')";
             SqlCommand cmd = new SqlCommand(query, db.getConn());
             db.openConn();
-            cmd.ExecuteNonQuery();
+            int modified = (int)cmd.ExecuteScalar();
+            foreach (var control in specGroupBox.Controls)
+            {
+                if (control is CheckBox)
+                {
+                    CheckBox box = (CheckBox)control;
+                    if (box.Checked == true)
+                    {
+                        string insertQuery = $"INSERT INTO SpecLinks (CabId, SpecId) values ('{modified}', '{box.Tag.ToString()}')";
+                        SqlCommand insertCmd = new SqlCommand(insertQuery, db.getConn());
+                        insertCmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            foreach (var control in equipGroupBox.Controls)
+            {
+                if (control is CheckBox)
+                {
+                    CheckBox box = (CheckBox)control;
+                    if (box.Checked == true)
+                    {
+                        string insertQuery = $"INSERT INTO EquipLinks (CabId, EquipId) values ('{modified}', '{box.Tag.ToString()}')";
+                        SqlCommand insertCmd = new SqlCommand(insertQuery, db.getConn());
+                        insertCmd.ExecuteNonQuery();
+                    }
+                }
+            }
+
             refreshDataGrid(dataGridView1);
 
         }
@@ -270,6 +266,70 @@ namespace school
             cmd.ExecuteNonQuery();
             refreshDataGrid(dataGridView1);
 
+        }
+
+        private void applyEquipBtn_Click(object sender, EventArgs e)
+        {
+            foreach (var control in equipGroupBox.Controls)
+            {
+                if (control is CheckBox)
+                {
+                    CheckBox box = (CheckBox)control;
+                    if (box.Checked == true)
+                    {
+                        string query = $"SELECT COUNT(*) FROM EquipLinks WHERE CabId =  '{selectedRecordId}' AND EquipId = '{box.Tag.ToString()}'";
+                        SqlCommand cmd = new SqlCommand(query, db.getConn());
+                        db.openConn();
+                        Int32 count = (Int32)cmd.ExecuteScalar();
+                        if (count == 0)
+                        {
+                            string insertQuery = $"INSERT INTO EquipLinks (CabId, EquipId) values ('{selectedRecordId}', '{box.Tag.ToString()}')";
+                            SqlCommand insertCmd = new SqlCommand(insertQuery, db.getConn());
+                            insertCmd.ExecuteNonQuery();
+                        }
+                    }
+                    else
+                    {
+                        string query = $"DELETE FROM EquipLinks where CabId = '{selectedRecordId}' AND EquipId = {box.Tag.ToString()}";
+                        SqlCommand cmd = new SqlCommand(query, db.getConn());
+                        db.openConn();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            refreshDataGrid(dataGridView1);
+        }
+
+        private void applySpecBtn_Click(object sender, EventArgs e)
+        {
+            foreach (var control in specGroupBox.Controls)
+            {
+                if (control is CheckBox)
+                {
+                    CheckBox box = (CheckBox)control;
+                    if (box.Checked == true)
+                    {
+                        string query = $"SELECT COUNT(*) FROM SpecLinks WHERE CabId =  '{selectedRecordId}' AND SpecId = '{box.Tag.ToString()}'";
+                        SqlCommand cmd = new SqlCommand(query, db.getConn());
+                        db.openConn();
+                        Int32 count = (Int32)cmd.ExecuteScalar();
+                        if (count == 0)
+                        {
+                            string insertQuery = $"INSERT INTO SpecLinks (CabId, SpecId) values ('{selectedRecordId}', '{box.Tag.ToString()}')";
+                            SqlCommand insertCmd = new SqlCommand(insertQuery, db.getConn());
+                            insertCmd.ExecuteNonQuery();
+                        }
+                    }
+                    else
+                    {
+                        string query = $"DELETE FROM SpecLinks where CabId = '{selectedRecordId}' AND SpecId = {box.Tag.ToString()}";
+                        SqlCommand cmd = new SqlCommand(query, db.getConn());
+                        db.openConn();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            refreshDataGrid(dataGridView1);
         }
     }
 }

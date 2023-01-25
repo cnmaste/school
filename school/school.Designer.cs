@@ -40,6 +40,8 @@
             this.addButton = new System.Windows.Forms.Button();
             this.rmButton = new System.Windows.Forms.Button();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.applyEquipBtn = new System.Windows.Forms.Button();
+            this.applySpecBtn = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cabUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.floorUpDown)).BeginInit();
@@ -49,9 +51,9 @@
             // dataGridView1
             // 
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(12, 239);
+            this.dataGridView1.Location = new System.Drawing.Point(12, 250);
             this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.Size = new System.Drawing.Size(840, 202);
+            this.dataGridView1.Size = new System.Drawing.Size(840, 308);
             this.dataGridView1.TabIndex = 0;
             this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellClick);
             // 
@@ -105,7 +107,7 @@
             // 
             // equipGroupBox
             // 
-            this.equipGroupBox.Location = new System.Drawing.Point(451, 22);
+            this.equipGroupBox.Location = new System.Drawing.Point(873, 12);
             this.equipGroupBox.Name = "equipGroupBox";
             this.equipGroupBox.Size = new System.Drawing.Size(200, 207);
             this.equipGroupBox.TabIndex = 16;
@@ -114,7 +116,7 @@
             // 
             // specGroupBox
             // 
-            this.specGroupBox.Location = new System.Drawing.Point(657, 28);
+            this.specGroupBox.Location = new System.Drawing.Point(873, 283);
             this.specGroupBox.Name = "specGroupBox";
             this.specGroupBox.Size = new System.Drawing.Size(200, 201);
             this.specGroupBox.TabIndex = 17;
@@ -150,11 +152,33 @@
             this.comboBox1.Size = new System.Drawing.Size(121, 21);
             this.comboBox1.TabIndex = 20;
             // 
+            // applyEquipBtn
+            // 
+            this.applyEquipBtn.Location = new System.Drawing.Point(873, 225);
+            this.applyEquipBtn.Name = "applyEquipBtn";
+            this.applyEquipBtn.Size = new System.Drawing.Size(75, 23);
+            this.applyEquipBtn.TabIndex = 21;
+            this.applyEquipBtn.Text = "Применить";
+            this.applyEquipBtn.UseVisualStyleBackColor = true;
+            this.applyEquipBtn.Click += new System.EventHandler(this.applyEquipBtn_Click);
+            // 
+            // applySpecBtn
+            // 
+            this.applySpecBtn.Location = new System.Drawing.Point(873, 490);
+            this.applySpecBtn.Name = "applySpecBtn";
+            this.applySpecBtn.Size = new System.Drawing.Size(75, 23);
+            this.applySpecBtn.TabIndex = 22;
+            this.applySpecBtn.Text = "Применить";
+            this.applySpecBtn.UseVisualStyleBackColor = true;
+            this.applySpecBtn.Click += new System.EventHandler(this.applySpecBtn_Click);
+            // 
             // school
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(864, 452);
+            this.ClientSize = new System.Drawing.Size(1171, 570);
+            this.Controls.Add(this.applySpecBtn);
+            this.Controls.Add(this.applyEquipBtn);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.rmButton);
             this.Controls.Add(this.addButton);
@@ -193,6 +217,8 @@
         private System.Windows.Forms.Button addButton;
         private System.Windows.Forms.Button rmButton;
         private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Button applyEquipBtn;
+        private System.Windows.Forms.Button applySpecBtn;
     }
 }
 
